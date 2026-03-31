@@ -14,6 +14,16 @@
           />
         </div>
         <div class="input-group">
+          <label for="email">邮箱</label>
+          <input 
+            id="email" 
+            v-model="registerForm.email" 
+            type="email" 
+            placeholder="请输入邮箱"
+            required
+          />
+        </div>
+        <div class="input-group">
           <label for="password">密码</label>
           <input 
             id="password" 
@@ -33,7 +43,7 @@
             required
           />
         </div>
-        <button type="submit" class="submit-btn">注册</button>
+        <button type="submit" class="submit-btn" :disabled="loading">注册</button>
       </form>
       <div class="switch-form">
         <p>已有账户？<span @click="switchToLogin" class="link">立即登录</span></p>
@@ -46,23 +56,27 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { userApi } from '@/services/api/userApi'
 
 interface RegisterForm {
   username: string
+  email: string
   password: string
   confirmPassword: string
 }
 
 const router = useRouter()
+const loading = ref(false)
 const registerForm = ref<RegisterForm>({
   username: '',
+  email: '',
   password: '',
   confirmPassword: ''
 })
 
-const handleRegister = () => {
-  if (!registerForm.value.username || !registerForm.value.password) {
-    ElMessage.error('请输入用户名和密码')
+const handleRegister = async () => {
+  if (!registerForm.value.username || !registerForm.value.email || !registerForm.value.password) {
+    ElMessage.error('请输入用户名、邮箱和密码')
     return
   }
 
@@ -76,11 +90,25 @@ const handleRegister = () => {
     return
   }
 
-  // 这里是注册逻辑，实际项目中应调用API
-  // 模拟注册成功
-  localStorage.setItem('user', JSON.stringify({ username: registerForm.value.username }))
-  ElMessage.success('注册成功')
-  router.push('/login')
+  loading.value = true
+  try {
+    const response = await userApi.register({
+      username: registerForm.value.username,
+      email: registerForm.value.email,
+      password: registerForm.value.password
+    })
+    
+    if (response.success) {
+      ElMessage.success(response.message)
+      router.push('/login')
+    } else {
+      ElMessage.error(response.message || '注册失败')
+    }
+  } catch (error: any) {
+    ElMessage.error(error.response?.data?.message || '注册失败，请检查网络连接')
+  } finally {
+    loading.value = false
+  }
 }
 
 const switchToLogin = () => {
@@ -156,8 +184,13 @@ h2 {
   transition: opacity 0.3s ease;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .switch-form {

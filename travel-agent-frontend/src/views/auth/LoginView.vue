@@ -23,7 +23,7 @@
             required
           />
         </div>
-        <button type="submit" class="submit-btn">登录</button>
+        <button type="submit" class="submit-btn" :disabled="loading">登录</button>
       </form>
       <div class="switch-form">
         <p>还没有账户？<span @click="switchToRegister" class="link">立即注册</span></p>
@@ -36,6 +36,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { userApi } from '@/services/api/userApi'
 
 interface LoginForm {
   username: string
@@ -43,20 +44,32 @@ interface LoginForm {
 }
 
 const router = useRouter()
+const loading = ref(false)
 const loginForm = ref<LoginForm>({
   username: '',
   password: ''
 })
 
-const handleLogin = () => {
-  // 这里是登录逻辑，实际项目中应调用API
-  if (loginForm.value.username && loginForm.value.password) {
-    // 模拟登录成功
-    localStorage.setItem('user', JSON.stringify({ username: loginForm.value.username }))
-    ElMessage.success('登录成功')
-    router.push('/home')
-  } else {
+const handleLogin = async () => {
+  if (!loginForm.value.username || !loginForm.value.password) {
     ElMessage.error('请输入用户名和密码')
+    return
+  }
+
+  loading.value = true
+  try {
+    const response = await userApi.login(loginForm.value)
+    if (response.success) {
+      ElMessage.success(response.message)
+      localStorage.setItem('user', JSON.stringify(response.data))
+      router.push('/home')
+    } else {
+      ElMessage.error(response.message || '登录失败')
+    }
+  } catch (error: any) {
+    ElMessage.error(error.response?.data?.message || '登录失败，请检查网络连接')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -133,8 +146,13 @@ h2 {
   transition: opacity 0.3s ease;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .switch-form {
