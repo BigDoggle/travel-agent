@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 用户实体
  */
 @Entity
-@Table(name = "user", indexes = {
+@Table(name = "users", indexes = {
     @Index(name = "idx_username", columnList = "username"),
     @Index(name = "idx_email", columnList = "email")
 })
