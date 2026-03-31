@@ -1,4 +1,3 @@
-# Profile Views Package
 import { defineComponent } from 'vue'
 
 /**

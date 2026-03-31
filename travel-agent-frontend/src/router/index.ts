@@ -1,4 +1,3 @@
-# Router Package
 import { createRouter, createWebHistory } from 'vue-router'
 
 /**

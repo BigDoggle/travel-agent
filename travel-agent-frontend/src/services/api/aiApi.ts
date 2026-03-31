@@ -1,4 +1,3 @@
-# API Services Package
 import api from '../api'
 
 /**
@@ -27,8 +26,7 @@ export const aiApi = {
   },
 
   /**
-   * RAG检索
-   */
+   * RAG检�?   */
   rag: (data: any) => {
     return api.post('/ai/rag', data)
   },

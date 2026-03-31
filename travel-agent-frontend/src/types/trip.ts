@@ -1,4 +1,3 @@
-# Types Package
 /**
  * 行程类型
  */

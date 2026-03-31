@@ -1,4 +1,3 @@
-# Store Package
 import { createPinia } from 'pinia'
 
 /**

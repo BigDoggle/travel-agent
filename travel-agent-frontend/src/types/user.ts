@@ -1,4 +1,3 @@
-# Types Package
 /**
  * 用户类型
  */

@@ -1,4 +1,3 @@
-# Types Package
 /**
  * 响应类型
  */

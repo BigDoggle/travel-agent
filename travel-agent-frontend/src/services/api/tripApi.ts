@@ -1,4 +1,3 @@
-# API Services Package
 import api from '../api'
 
 /**

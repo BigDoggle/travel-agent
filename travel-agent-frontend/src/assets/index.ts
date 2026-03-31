@@ -1,4 +1,3 @@
-# Assets Package
 import { defineComponent } from 'vue'
 
 /**

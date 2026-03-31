@@ -1,4 +1,3 @@
-# Utils Package
 import { defineComponent } from 'vue'
 
 /**

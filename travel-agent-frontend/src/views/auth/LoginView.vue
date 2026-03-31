@@ -1,4 +1,3 @@
-# Auth Views Package
 import { defineComponent } from 'vue'
 
 /**

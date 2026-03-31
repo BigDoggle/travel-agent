@@ -1,9 +1,7 @@
-# Common Components Package
 import { defineComponent } from 'vue'
 
 /**
- * 导航栏组件
- */
+ * 导航栏组�? */
 export default defineComponent({
   name: 'Navbar'
 })

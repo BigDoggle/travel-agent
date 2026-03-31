@@ -1,4 +1,3 @@
-# Common Components Package
 import { defineComponent } from 'vue'
 
 /**

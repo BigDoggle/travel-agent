@@ -1,4 +1,3 @@
-# Trip Detail Views Package
 import { defineComponent } from 'vue'
 
 /**

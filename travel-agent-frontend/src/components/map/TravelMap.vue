@@ -1,4 +1,3 @@
-# Map Components Package
 import { defineComponent } from 'vue'
 
 /**
