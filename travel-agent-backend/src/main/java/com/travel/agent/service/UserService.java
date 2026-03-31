@@ -1,12 +1,11 @@
 package com.travel.agent.service;
 
+import com.travel.agent.common.BusinessException;
 import com.travel.agent.entity.User;
-import com.travel.agent.repository.UserRepository;
+import com.travel.agent.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * 用户服务类
@@ -15,7 +14,7 @@ import java.util.Optional;
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMapper userMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -23,15 +22,15 @@ public class UserService {
     /**
      * 根据用户名查找用户
      */
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User findByUsername(String username) {
+        return userMapper.findByUsername(username);
     }
 
     /**
      * 根据邮箱查找用户
      */
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User findByEmail(String email) {
+        return userMapper.findByEmail(email);
     }
 
     /**
@@ -39,13 +38,15 @@ public class UserService {
      */
     public User registerUser(User user) {
         // 检查用户名是否已存在
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("用户名已存在");
+        User existingUser = userMapper.findByUsername(user.getUsername());
+        if (existingUser != null) {
+            throw new BusinessException("用户名已存在");
         }
 
         // 检查邮箱是否已存在
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("邮箱已被注册");
+        User existingEmail = userMapper.findByEmail(user.getEmail());
+        if (existingEmail != null) {
+            throw new BusinessException("邮箱已被注册");
         }
 
         // 加密密码
@@ -54,15 +55,18 @@ public class UserService {
         // 设置默认状态
         user.setStatus(1);
 
-        return userRepository.save(user);
+        userMapper.insert(user);
+        return user;
     }
 
     /**
      * 更新用户信息
      */
     public User updateUser(Long id, User userDetails) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        User user = userMapper.findById(id);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
 
         user.setUsername(userDetails.getUsername());
         user.setEmail(userDetails.getEmail());
@@ -72,16 +76,16 @@ public class UserService {
         user.setAvatar(userDetails.getAvatar());
         user.setPhone(userDetails.getPhone());
 
-        return userRepository.save(user);
+        userMapper.update(user);
+        return user;
     }
 
     /**
      * 验证用户凭据
      */
     public boolean validateUser(String username, String password) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
+        User user = userMapper.findByUsername(username);
+        if (user != null) {
             return passwordEncoder.matches(password, user.getPassword());
         }
         return false;
@@ -90,7 +94,7 @@ public class UserService {
     /**
      * 根据ID查找用户
      */
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public User findById(Long id) {
+        return userMapper.findById(id);
     }
 }

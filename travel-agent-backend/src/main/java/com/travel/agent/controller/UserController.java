@@ -1,15 +1,12 @@
 package com.travel.agent.controller;
 
+import com.travel.agent.common.Result;
 import com.travel.agent.entity.User;
 import com.travel.agent.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * 用户控制器
@@ -26,68 +23,43 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody @Valid LoginRequest request) {
-        Map<String, Object> response = new HashMap<>();
+    public Result<User> login(@RequestBody @Valid LoginRequest request) {
+        User user = userService.findByUsername(request.getUsername());
         
-        Optional<User> userOpt = userService.findByUsername(request.getUsername());
-        
-        if (userOpt.isPresent() && userService.validateUser(request.getUsername(), request.getPassword())) {
-            User user = userOpt.get();
-            response.put("success", true);
-            response.put("message", "登录成功");
-            response.put("data", user);
-        } else {
-            response.put("success", false);
-            response.put("message", "用户名或密码错误");
+        if (user != null && userService.validateUser(request.getUsername(), request.getPassword())) {
+            return Result.success("登录成功", user);
         }
         
-        return ResponseEntity.ok(response);
+        return Result.error("用户名或密码错误");
     }
 
     /**
      * 用户注册
      */
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody @Valid RegisterRequest request) {
-        Map<String, Object> response = new HashMap<>();
+    public Result<User> register(@RequestBody @Valid RegisterRequest request) {
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
         
-        try {
-            User user = new User();
-            user.setUsername(request.getUsername());
-            user.setEmail(request.getEmail());
-            user.setPassword(request.getPassword());
-            
-            User savedUser = userService.registerUser(user);
-            
-            response.put("success", true);
-            response.put("message", "注册成功");
-            response.put("data", savedUser);
-        } catch (RuntimeException e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-        }
+        User savedUser = userService.registerUser(user);
         
-        return ResponseEntity.ok(response);
+        return Result.success("注册成功", savedUser);
     }
 
     /**
      * 获取用户信息
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getUser(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
+    public Result<User> getUser(@PathVariable Long id) {
+        User user = userService.findById(id);
         
-        Optional<User> userOpt = userService.findById(id);
-        
-        if (userOpt.isPresent()) {
-            response.put("success", true);
-            response.put("data", userOpt.get());
-        } else {
-            response.put("success", false);
-            response.put("message", "用户不存在");
+        if (user != null) {
+            return Result.success("获取成功", user);
         }
         
-        return ResponseEntity.ok(response);
+        return Result.error("用户不存在");
     }
 
     /**
