@@ -1,0 +1,38 @@
+# Pinecone Configuration
+pinecone:
+  api:
+    key: ${PINECONE_API_KEY}
+  environment: ${PINECONE_ENVIRONMENT}
+  index:
+    preferences: travel-preferences-index
+    history: travel-history-index
+    knowledge: knowledge-base-index
+  namespace:
+    preferences: preferences
+    history: history
+    knowledge: knowledge
+  batch-size: 100
+  timeout: 30000
+  dimension: 1536
+  metric: cosine
+
+# OpenAI Configuration
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+  model:
+    chat: gpt-4
+    embedding: text-embedding-ada-002
+  timeout: 30000
+  max-tokens: 2000
+
+# Memory Configuration
+memory:
+  short-term:
+    redis:
+      ttl: 3600
+      max-size: 50
+  long-term:
+    pinecone:
+      top-k: 10
+      similarity-threshold: 0.7
