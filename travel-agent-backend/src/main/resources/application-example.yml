@@ -63,7 +63,7 @@ openai:
     key: your-openai-api-key
   model: qwen-plus
   embedding:
-    model: text-embedding-ada-002
+    model: text-embedding-v4
 
 # 日志配置
 logging:
