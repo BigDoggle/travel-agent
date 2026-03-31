@@ -36,7 +36,7 @@ public class UserPreference {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(precision = 3, scale = 2)
+    @Column(precision = 3)
     private Double confidence = 0.00;
 
     @Column(length = 20)

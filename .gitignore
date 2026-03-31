@@ -39,6 +39,10 @@ logs/
 .env.local
 .env.*.local
 
+# Application configuration (contains sensitive information)
+application.yml
+!application-example.yml
+
 # Node modules
 node_modules/
 package-lock.json

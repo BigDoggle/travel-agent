@@ -45,7 +45,7 @@ public class TripHistory {
     @Column(name = "budget_level", length = 20)
     private String budgetLevel;
 
-    @Column(name = "satisfaction_score", precision = 2, scale = 1)
+    @Column(name = "satisfaction_score", precision = 2)
     private Double satisfactionScore;
 
     @Column(columnDefinition = "JSON")

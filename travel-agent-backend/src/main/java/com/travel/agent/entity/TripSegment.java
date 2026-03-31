@@ -53,7 +53,7 @@ public class TripSegment {
     @Column(columnDefinition = "POINT")
     private String coordinates;
 
-    @Column(precision = 2, scale = 1)
+    @Column(precision = 2)
     private Double rating;
 
     @Column(name = "created_at", updatable = false)

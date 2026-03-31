@@ -45,7 +45,7 @@ public class KnowledgeBase {
     @Column(length = 20)
     private String source;
 
-    @Column(precision = 2, scale = 1)
+    @Column(precision = 2)
     private Double rating = 0.00;
 
     @Column

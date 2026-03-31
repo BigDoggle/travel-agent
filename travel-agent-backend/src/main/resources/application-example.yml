@@ -1,0 +1,90 @@
+# 示例配置文件
+# 使用说明：
+# 1. 复制此文件为 application.yml
+# 2. 填写实际的数据库连接信息和 API Key
+# 3. 或者设置环境变量覆盖配置
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: travel-agent-backend
+
+  datasource:
+    # 方式1：使用环境变量 DATABASE_URL
+    # 方式2：直接填写连接信息
+    url: jdbc:postgresql://db.id.supabase.co:5432/postgres?user=postgres&password=your-password
+    username: postgres
+    password: your-password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+  data:
+    redis:
+      host: localhost
+      password:
+      port: 6379
+      database: 0
+      timeout: 2000ms
+
+# Pinecone 向量数据库配置
+# 注册地址：https://www.pinecone.io/
+pinecone:
+  api:
+    key: your-pinecone-api-key
+  environment: us-west1-gcp
+  index:
+    preferences: travel-preferences
+    history: travel-history
+    knowledge: knowledge-base
+
+# OpenAI API 配置
+# 注册地址：https://platform.openai.com/
+# 阿里云 DashScope 兼容 OpenAI API
+# DashScope 配置：base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+openai:
+  base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  api:
+    key: your-openai-api-key
+  model: qwen-plus
+  embedding:
+    model: text-embedding-ada-002
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.travel.agent: DEBUG
+    dev.langchain4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/travel-agent.log
+    max-size: 10MB
+    max-history: 30
+
+# Actuator 端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

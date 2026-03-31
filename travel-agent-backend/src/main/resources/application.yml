@@ -1,45 +1,84 @@
-# Server Configuration
-server.port=8080
-server.servlet.context-path=/
+server:
+  port: 8080
+  servlet:
+    context-path: /
 
-# Application Name
-spring.application.name=travel-agent-backend
+spring:
+  application:
+    name: travel-agent-backend
 
-# Database Configuration
-spring.datasource.url=${DATABASE_URL:jdbc:mysql://localhost:3306/travel_agent?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-spring.datasource.username=${DATABASE_USERNAME:root}
-spring.datasource.password=${DATABASE_PASSWORD:root}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:postgresql://db.oxxzzzzynkirfmpcobhh.supabase.co:5432/postgres?sslmode=require&connectTimeout=60
+    username: postgres
+    password: 6w8qAbxM9fb8pE3j
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 10
+      connection-test-query: "SELECT 1"
 
-# JPA Configuration
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
-spring.jpa.properties.hibernate.format_sql=true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        connection:
+          provider_disables_autocommit: true
 
-# Redis Configuration
-spring.redis.host=${REDIS_HOST:localhost}
-spring.redis.port=${REDIS_PORT:6379}
-spring.redis.password=${REDIS_PASSWORD:}
-spring.redis.database=0
-spring.redis.timeout=2000ms
+  redis:
+    host: redis-16751.c57.us-east-1-4.ec2.cloud.redislabs.com
+    port: 16751
+    password: Kpk5v6cIrG1KjGDOWWew7a30JbT781QP
+    database: 0
+    timeout: 2000ms
 
-# Redis Cache Configuration
-spring.cache.type=redis
-spring.cache.redis.time-to-live=3600000
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
 
-# Logging Configuration
-logging.level.root=INFO
-logging.level.com.travel.agent=DEBUG
-logging.level.dev.langchain4j=DEBUG
-logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
-logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+pinecone:
+  api:
+    key: ${PINECONE_API_KEY:your-pinecone-api-key}
+  environment: ${PINECONE_ENVIRONMENT:us-west1-gcp}
+  index:
+    preferences: ${PINECONE_INDEX_PREFERENCES:travel-preferences}
+    history: ${PINECONE_INDEX_HISTORY:travel-history}
+    knowledge: ${PINECONE_INDEX_KNOWLEDGE:knowledge-base}
 
-# File Logging
-logging.file.name=logs/travel-agent.log
-logging.file.max-size=10MB
-logging.file.max-history=30
+openai:
+  base-url: ${OPENAI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+  api:
+    key: ${OPENAI_API_KEY:sk-ef935c1876da486dbcfd6241bf95f2c1}
+  model: ${OPENAI_MODEL:qwen-plus}
+  embedding:
+    model: ${OPENAI_EMBEDDING_MODEL:text-embedding-ada-002}
 
-# Actuator
-management.endpoints.web.exposure.include=health,info,metrics
-management.endpoint.health.show-details=when-authorized
+logging:
+  level:
+    root: INFO
+    com.travel.agent: DEBUG
+    dev.langchain4j: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.postgresql: DEBUG
+    org.springframework.data.redis: DEBUG
+    io.lettuce: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/travel-agent.log
+    max-size: 10MB
+    max-history: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
