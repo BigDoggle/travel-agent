@@ -51,27 +51,28 @@ const loginForm = ref<LoginForm>({
 })
 
 const handleLogin = async () => {
-  if (!loginForm.value.username || !loginForm.value.password) {
-    ElMessage.error('请输入用户名和密码')
-    return
-  }
-
-  loading.value = true
-  try {
-    const response = await userApi.login(loginForm.value)
-    if (response.success) {
-      ElMessage.success(response.message)
-      localStorage.setItem('user', JSON.stringify(response.data))
-      router.push('/home')
-    } else {
-      ElMessage.error(response.message || '登录失败')
+    if (!loginForm.value.username || !loginForm.value.password) {
+      ElMessage.error('请输入用户名和密码')
+      return
     }
-  } catch (error: any) {
-    ElMessage.error(error.response?.data?.message || '登录失败，请检查网络连接')
-  } finally {
-    loading.value = false
+
+    loading.value = true
+    try {
+      const response = await userApi.login(loginForm.value)
+      if (response.success) {
+        ElMessage.success(response.message)
+        localStorage.setItem('user', JSON.stringify(response.data))
+        localStorage.setItem('token', response.token)
+        router.push('/')
+      } else {
+        ElMessage.error(response.message || '登录失败')
+      }
+    } catch (error: any) {
+      ElMessage.error(error.response?.data?.message || '登录失败，请检查网络连接')
+    } finally {
+      loading.value = false
+    }
   }
-}
 
 const switchToRegister = () => {
   router.push('/register')
@@ -84,13 +85,12 @@ const switchToRegister = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(255, 248, 220, 0.3) 0%, rgba(255, 255, 224, 0.3) 100%);
-  backdrop-filter: blur(10px);
+  background: white;
   padding: 20px;
 }
 
 .login-form {
-  background: rgba(255, 255, 240, 0.85);
+  background: white;
   border-radius: 12px;
   padding: 30px;
   width: 100%;
@@ -102,7 +102,7 @@ const switchToRegister = () => {
 h2 {
   text-align: center;
   margin-bottom: 24px;
-  color: #8b5a2b;
+  color: black;
   font-weight: 500;
 }
 
@@ -113,16 +113,16 @@ h2 {
 .input-group label {
   display: block;
   margin-bottom: 6px;
-  color: #8b5a2b;
+  color: black;
   font-size: 14px;
 }
 
 .input-group input {
   width: 100%;
   padding: 12px;
-  border: 1px solid rgba(210, 180, 140, 0.5);
+  border: 1px solid rgba(255, 228, 196, 0.5);
   border-radius: 6px;
-  background: rgba(255, 255, 245, 0.8);
+  background: white;
   color: #333;
   font-size: 16px;
   transition: border-color 0.3s ease;
@@ -131,16 +131,16 @@ h2 {
 .input-group input:focus {
   outline: none;
   border-color: #d2b48c;
-  box-shadow: 0 0 0 2px rgba(210, 180, 140, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 248, 220, 0.5);
 }
 
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(to right, #d2b48c, #e6bc6d);
-  border: none;
+  background: linear-gradient(to right, #f5e6c8, #f8f0d8);
+  border: 1px solid rgba(255, 228, 196, 0.5);
   border-radius: 6px;
-  color: white;
+  color: black;
   font-size: 16px;
   cursor: pointer;
   transition: opacity 0.3s ease;
@@ -161,17 +161,17 @@ h2 {
 }
 
 .switch-form p {
-  color: #8b5a2b;
+  color: black;
   font-size: 14px;
 }
 
 .link {
-  color: #d2b48c;
+  color: #f5e6c8;
   cursor: pointer;
   text-decoration: underline;
 }
 
 .link:hover {
-  color: #c19e6b;
+  color: #f8f0d8;
 }
 </style>

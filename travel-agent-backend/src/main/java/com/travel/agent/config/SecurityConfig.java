@@ -1,5 +1,6 @@
 package com.travel.agent.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,9 +17,14 @@ import static org.springframework.security.config.Customizer.withDefaults;
 /**
  * 安全配置类
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    
+    public SecurityConfig() {
+        log.info("SecurityConfig initialized");
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

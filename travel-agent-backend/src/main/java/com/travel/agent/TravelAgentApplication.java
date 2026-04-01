@@ -1,5 +1,6 @@
 package com.travel.agent;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @version 1.0.0
  * @since 2024-03-30
  */
+@Slf4j
 @SpringBootApplication
 @EnableCaching
 @EnableAsync
@@ -20,9 +22,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class TravelAgentApplication {
 
     public static void main(String[] args) {
+        log.info("Starting Travel Agent Backend Server...");
         SpringApplication.run(TravelAgentApplication.class, args);
-        System.out.println("========================================");
-        System.out.println("Travel Agent Backend Server Started!");
-        System.out.println("========================================");
+        log.info("========================================");
+        log.info("Travel Agent Backend Server Started!");
+        log.info("========================================");
     }
 }

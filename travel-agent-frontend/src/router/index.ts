@@ -59,7 +59,17 @@ router.beforeEach((to, from, next) => {
   if (to.meta.title) {
     document.title = `${to.meta.title} - AI智能旅行规划系统`
   }
-  next()
+
+  // 检查是否需要登录
+  const requiresAuth = !['Login', 'Register'].includes(to.name as string)
+  const token = localStorage.getItem('token')
+
+  // 如果需要登录且没有token，重定向到登录页面
+  if (requiresAuth && !token) {
+    next({ name: 'Login' })
+  } else {
+    next()
+  }
 })
 
 export default router
