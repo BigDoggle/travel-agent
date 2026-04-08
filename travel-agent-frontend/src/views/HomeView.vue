@@ -4,25 +4,19 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <h3>会话管理</h3>
-        <button class="new-chat-btn">+ 新建会话</button>
+        <button class="new-chat-btn" @click="createNewSession">+ 新建会话</button>
       </div>
       <div class="chat-list">
-        <div class="chat-item active">
+        <div 
+          v-for="session in sessions" 
+          :key="session.id" 
+          class="chat-item" 
+          :class="{ active: currentSessionId === session.id }"
+          @click="switchSession(session.id)"
+        >
           <div class="chat-info">
-            <div class="chat-title">旅行规划</div>
-            <div class="chat-preview">我想去日本旅游，推荐一下...</div>
-          </div>
-        </div>
-        <div class="chat-item">
-          <div class="chat-info">
-            <div class="chat-title">酒店推荐</div>
-            <div class="chat-preview">东京的酒店有什么推荐...</div>
-          </div>
-        </div>
-        <div class="chat-item">
-          <div class="chat-info">
-            <div class="chat-title">美食攻略</div>
-            <div class="chat-preview">大阪的美食有哪些...</div>
+            <div class="chat-title">{{ session.title }}</div>
+            <div class="chat-preview">{{ session.preview }}</div>
           </div>
         </div>
       </div>
@@ -36,27 +30,21 @@
       </div>
 
       <!-- 对话内容 -->
-      <div class="chat-messages">
-        <div class="message ai-message">
-          <div class="message-content">
-            <p>你好！我是你的AI旅行助手，有什么可以帮助你的吗？</p>
+      <div class="chat-messages" ref="chatMessagesRef">
+        <div 
+          v-for="(msg, index) in messages" 
+          :key="index" 
+          class="message" 
+          :class="msg.type === 'user' ? 'user-message' : 'ai-message'"
+        >
+          <div class="message-content" v-if="msg.type === 'user'">
+            <p v-for="(line, lineIndex) in msg.content.split('\n')" :key="lineIndex">{{ line }}</p>
           </div>
+          <div class="message-content" v-else v-html="parseMarkdown(msg.content)"></div>
         </div>
-        <div class="divider"></div>
-        <div class="message user-message">
+        <div v-if="isLoading" class="message ai-message">
           <div class="message-content">
-            <p>我想去日本旅游，推荐一下好玩的地方</p>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="message ai-message">
-          <div class="message-content">
-            <p>日本有很多好玩的地方，以下是一些推荐：</p>
-            <p>1. 东京：东京塔、浅草寺、涩谷十字路口</p>
-            <p>2. 京都：金阁寺、清水寺、伏见稻荷大社</p>
-            <p>3. 大阪：大阪城、环球影城、道顿堀</p>
-            <p>4. 北海道：札幌、函馆、旭川</p>
-            <p>你对哪个地方特别感兴趣呢？</p>
+            <p>AI正在思考...</p>
           </div>
         </div>
       </div>
@@ -65,29 +53,228 @@
       <div class="chat-input-area">
         <input 
           type="text" 
-          v-model="message" 
+          v-model="inputMessage" 
           placeholder="输入你的问题..."
           class="chat-input"
           @keyup.enter="sendMessage"
+          :disabled="isLoading"
         />
-        <button class="send-btn" @click="sendMessage">发送</button>
+        <button class="send-btn" @click="sendMessage" :disabled="isLoading">发送</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 
-const message = ref('')
+// 会话管理
+const sessions = ref([
+  { id: '1', title: '旅行规划', preview: '我想去日本旅游，推荐一下...' },
+  { id: '2', title: '酒店推荐', preview: '东京的酒店有什么推荐...' },
+  { id: '3', title: '美食攻略', preview: '大阪的美食有哪些...' }
+])
+const currentSessionId = ref('1')
 
-const sendMessage = () => {
-  if (message.value.trim()) {
-    // 这里可以添加发送消息的逻辑
-    console.log('发送消息:', message.value)
-    message.value = ''
+// 消息管理
+const messages = ref([
+  {
+    type: 'ai',
+    content: '你好！我是你的AI旅行助手，有什么可以帮助你的吗？'
+  },
+  {
+    type: 'user',
+    content: '我想去日本旅游，推荐一下好玩的地方'
+  },
+  {
+    type: 'ai',
+    content: '日本有很多好玩的地方，以下是一些推荐：\n1. 东京：东京塔、浅草寺、涩谷十字路口\n2. 京都：金阁寺、清水寺、伏见稻荷大社\n3. 大阪：大阪城、环球影城、道顿堀\n4. 北海道：札幌、函馆、旭川\n你对哪个地方特别感兴趣呢？'
+  }
+])
+const inputMessage = ref('')
+const isLoading = ref(false)
+const chatMessagesRef = ref<HTMLElement | null>(null)
+
+// 滚动到底部的函数
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (chatMessagesRef.value) {
+      chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight
+    }
+  })
+}
+
+// Markdown解析函数
+const parseMarkdown = (text: string): string => {
+  if (!text) return ''
+  
+  // 替换标题
+  text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>')
+  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>')
+  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>')
+  
+  // 替换粗体
+  text = text.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+  
+  // 替换斜体
+  text = text.replace(/\*(.*?)\*/gim, '<em>$1</em>')
+  
+  // 替换列表
+  text = text.replace(/^\* (.*$)/gim, '<li>$1</li>')
+  text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+  
+  // 替换有序列表
+  text = text.replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+  text = text.replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
+  
+  // 替换链接
+  text = text.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank">$1</a>')
+  
+  // 替换图片
+  text = text.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1">')
+  
+  // 替换代码块
+  text = text.replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+  
+  // 替换行内代码
+  text = text.replace(/`(.*?)`/gim, '<code>$1</code>')
+  
+  // 替换引用
+  text = text.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+  
+  return text
+}
+
+// 新建会话
+const createNewSession = () => {
+  const newSessionId = (sessions.value.length + 1).toString()
+  sessions.value.push({
+    id: newSessionId,
+    title: '新会话',
+    preview: '开始新的对话...'
+  })
+  currentSessionId.value = newSessionId
+  messages.value = [
+    {
+      type: 'ai',
+      content: '你好！我是你的AI旅行助手，有什么可以帮助你的吗？'
+    }
+  ]
+}
+
+// 切换会话
+const switchSession = (sessionId: string) => {
+  currentSessionId.value = sessionId
+  // 这里可以添加加载对应会话历史的逻辑
+}
+
+// 发送消息
+const sendMessage = async () => {
+  if (!inputMessage.value.trim() || isLoading.value) return
+
+  // 添加用户消息到消息列表
+  const userMessage = inputMessage.value.trim()
+  messages.value.push({
+    type: 'user',
+    content: userMessage
+  })
+  inputMessage.value = ''
+  isLoading.value = true
+
+  try {
+    // 模拟用户ID，实际应该从登录状态获取
+    const userId = 1
+    const sessionId = currentSessionId.value
+
+    // 添加AI消息占位
+    const aiMessageIndex = messages.value.length;
+    messages.value.push({
+      type: 'ai',
+      content: ''
+    });
+    
+    let aiResponse = '';
+
+    // 使用fetch API来发送POST请求，处理返回的流式响应
+    const response = await fetch(`/api/ai/chat/stream?userId=${userId}&sessionId=${sessionId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: userMessage
+    });
+
+    if (!response.ok) {
+      throw new Error('API请求失败');
+    }
+
+    // 处理流式响应
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('无法获取响应流');
+    }
+
+    // 处理SSE格式的流式数据
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      // 解码流式数据
+      const chunk = new TextDecoder('utf-8').decode(value);
+      buffer += chunk;
+
+      // 解析SSE格式
+      const lines = buffer.split('\n');
+      buffer = '';
+
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          // 提取data部分，保留原始格式
+          const data = line.substring(5);
+          aiResponse += data;
+          
+          // 更新AI消息内容（使用Vue的响应式更新）
+          // 先创建一个新的消息对象
+          const updatedMessage = {
+            ...messages.value[aiMessageIndex],
+            content: aiResponse
+          };
+          // 然后替换整个messages数组，确保Vue能够检测到变化
+          messages.value = [
+            ...messages.value.slice(0, aiMessageIndex),
+            updatedMessage,
+            ...messages.value.slice(aiMessageIndex + 1)
+          ];
+          
+          // 滚动到底部
+          scrollToBottom();
+        }
+      }
+    }
+
+    // 更新会话预览
+    const currentSession = sessions.value.find(s => s.id === sessionId)
+    if (currentSession) {
+      currentSession.preview = userMessage.length > 20 ? userMessage.substring(0, 20) + '...' : userMessage
+    }
+
+  } catch (error) {
+    console.error('发送消息失败:', error)
+    // 添加错误消息
+    messages.value.push({
+      type: 'ai',
+      content: '抱歉，处理您的请求时出现错误，请稍后重试。'
+    })
+  } finally {
+    isLoading.value = false
   }
 }
+
+// 页面加载时初始化
+onMounted(() => {
+  // 这里可以添加加载历史会话的逻辑
+})
 </script>
 
 <style scoped>

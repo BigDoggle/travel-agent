@@ -1,8 +1,8 @@
 package com.travel.agent.service.ai;
 
 import com.travel.agent.entity.ChatMessage;
+import reactor.core.publisher.Flux;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * AI对话服务接口
@@ -14,9 +14,9 @@ public interface AIChatService extends AIService {
      * @param userId 用户ID
      * @param sessionId 会话ID
      * @param message 用户输入消息
-     * @param consumer 回调函数，用于接收流式响应
+     * @return Flux<String> 流式返回的AI响应
      */
-    void processMessageStream(Long userId, String sessionId, String message, Consumer<String> consumer);
+    Flux<String> processMessageStream(Long userId, String sessionId, String message);
     
     /**
      * 获取用户的对话历史
