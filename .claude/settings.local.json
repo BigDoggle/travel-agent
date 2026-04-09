@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mvn compile:*)",
+      "Bash(rm:*)",
+      "Bash(mvn clean:*)",
+      "Bash(java:*)",
+      "Bash(where java:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(pkill:*)",
+      "Bash(jps -l)",
+      "Bash(tasklist)",
+      "Bash(findstr java:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd:*)",
+      "Bash(wmic process:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :8080)",
+      "Bash(powershell:*)",
+      "Bash(findstr 23232)",
+      "WebFetch(domain:github.com)",
+      "Bash(mvn test-compile:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:docs.langchain4j.dev)",
+      "WebFetch(domain:blog.csdn.net)",
+      "WebFetch(domain:forum.langchain.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

@@ -107,6 +107,7 @@ public class AIConfig {
         ⚠️ 只有 PlanAgent 能决定何时结束（decision=FINISH）
         ⚠️ FINISH 后调用 ReplanAgent 生成报告
         ⚠️ 你只负责调度，不生成内容
+        ⚠️ 最终的结果必须由replanAgent输出
         """)
                 .build();
     }

@@ -31,7 +31,7 @@ public class MCPServiceIntegrationTest {
         // 模拟用户ID和会话ID
         Long userId = 1L;
         String sessionId = "beijing-tour-test-" + System.currentTimeMillis();
-        String userInput = "为我规划一个北京一日游旅行路线";
+        String userInput = "生成一个天津三日游";
 
         log.info("用户ID: {}, 会话ID: {}", userId, sessionId);
         log.info("用户需求: {}", userInput);
@@ -48,22 +48,6 @@ public class MCPServiceIntegrationTest {
         log.info("✅ 协调服务执行成功");
         log.info("返回结果长度: {} 字符", result.length());
         log.info("结果预览:\n{}", result.substring(0, Math.min(500, result.length())));
-
-
-        // 额外验证：结果应包含北京相关关键词
-        String lowerResult = result.toLowerCase();
-        boolean containsBeijingKeywords = lowerResult.contains("北京") ||
-                                         lowerResult.contains("beijing") ||
-                                         lowerResult.contains("天安门") ||
-                                         lowerResult.contains("故宫") ||
-                                         lowerResult.contains("长城") ||
-                                         lowerResult.contains("颐和园");
-
-        if (containsBeijingKeywords) {
-            log.info("✅ 结果包含北京相关关键词");
-        } else {
-            log.warn("⚠️ 结果可能不包含北京相关关键词，请检查协调流程");
-        }
 
         log.info("========== 北京一日游规划场景测试完成 ==========");
     }

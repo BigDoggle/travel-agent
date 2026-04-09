@@ -8,6 +8,8 @@ server:
   port: 8080
   servlet:
     context-path: /
+  tomcat:
+    async-timeout: 300000  # 5分钟，与 WebConfig 保持一致
 
 spring:
   application:

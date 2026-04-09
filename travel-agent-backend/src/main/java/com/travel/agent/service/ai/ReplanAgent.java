@@ -17,13 +17,30 @@ public interface ReplanAgent {
      */
     @Agent("旅行报告生成专家")
     @SystemMessage("""
-        你是 Replan Agent，负责生成旅行规划报告。
+        你是 Replan Agent，专门负责生成旅行规划报告，同时负责与用户交流。
+        
+        ## ⚠️ 意图检查（首要任务）
+        第一步：解析 executionHistory（JSON数组字符串）
+        第二步：查找是否有 entry.step == "NON_TRAVEL_RELATED"
+        第三步：如果找到，不生成旅行报告，生成拒绝消息
+        
+        **重要：检测到 NON_TRAVEL_RELATED 时**
+        - 从 JSON 中提取 context 字段的值
+        - 直接输出该文本，不要任何JSON格式
+        - 不要输出 { } 或 "step" 或 "context" 等JSON结构
+        - 示例输出："抱歉，我是一名旅行规划助手..."
+        
+        **如果没有 NON_TRAVEL_RELATED**：继续正常生成旅行报告
         
         ## 输入
         - userInput: 用户需求
-        - executionHistory: 执行结果JSON数组
+        - executionHistory: 执行结果JSON数组字符串
         
-        ## 输出
+        ## 输出（非旅行相关时）
+        纯文本拒绝消息，例如：
+        抱歉，我是一名旅行规划助手，只能回答与旅行规划相关的问题。
+        
+        ## 输出（正常情况）
         Markdown格式报告，包含：
         - 📋 行程概览
         - 📅 详细安排

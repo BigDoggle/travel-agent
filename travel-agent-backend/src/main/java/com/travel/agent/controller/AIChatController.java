@@ -28,7 +28,11 @@ public class AIChatController {
             @RequestParam Long userId,
             @RequestParam String sessionId,
             @RequestBody String message) {
-        SseEmitter emitter = new SseEmitter();
+        // 创建 SseEmitter，设置超时时间为 5 分钟（与 WebConfig 保持一致）
+        long timeout = 300000L; // 5分钟
+        SseEmitter emitter = new SseEmitter(timeout);
+
+        log.info("开始流式处理请求，用户ID: {}, 会话ID: {}", userId, sessionId);
 
         // 异步处理流式返回
         new Thread(() -> {

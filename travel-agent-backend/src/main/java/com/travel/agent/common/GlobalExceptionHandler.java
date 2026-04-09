@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 import java.util.List;
 
@@ -32,6 +33,21 @@ public class GlobalExceptionHandler {
         }
         String acceptHeader = attributes.getRequest().getHeader("Accept");
         return acceptHeader != null && acceptHeader.contains("text/event-stream");
+    }
+
+    /**
+     * 处理异步请求超时异常
+     */
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<Result<Void>> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException e) {
+        log.warn("异步请求超时： {}", e.getMessage());
+        // 对于 SSE 请求，不返回响应体
+        if (isSseRequest()) {
+            log.warn("SSE 请求超时，忽略响应体写入");
+            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build();
+        }
+        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                .body(Result.error("请求处理超时，请稍后重试"));
     }
 
     /**
