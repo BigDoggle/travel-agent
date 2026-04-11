@@ -2,6 +2,7 @@ package com.travel.agent.service.memory;
 
 import com.travel.agent.entity.ChatMessage;
 import com.travel.agent.entity.UserPreference;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -23,9 +24,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SlidingWindowMemory {
     private static final int WINDOW_SIZE = 10;
     private final Map<String, Deque<ChatMessage>> conversationWindows = new ConcurrentHashMap<>();
+    private final Map<String, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
 
     @Autowired
     private MemoryService memoryService;
+
+    @Autowired
+    private DatabaseChatMemoryStore chatMemoryStore;
 
     /**
      * 异步处理记忆任务
@@ -84,15 +89,39 @@ public class SlidingWindowMemory {
     }
 
     /**
+     * 获取或创建MessageWindowChatMemory实例
+     */
+    private MessageWindowChatMemory getOrCreateChatMemory(String sessionKey) {
+        return chatMemories.computeIfAbsent(sessionKey, key ->
+                MessageWindowChatMemory.builder()
+                        .id(key)
+                        .maxMessages(WINDOW_SIZE)
+                        .build()
+        );
+    }
+
+    /**
+     * 获取LangChain4j MessageWindowChatMemory（用于智能体集成）
+     */
+    public MessageWindowChatMemory getChatMemory(String sessionKey) {
+        return getOrCreateChatMemory(sessionKey);
+    }
+
+    /**
      * 添加消息到窗口
      * 超出窗口大小时触发异步摘要生成
      */
     public void addMessage(String sessionKey, ChatMessage message) {
+        // 添加到自定义窗口（保持向后兼容）
         Deque<ChatMessage> window = conversationWindows.computeIfAbsent(
                 sessionKey, k -> new LinkedList<>()
         );
-
         window.addLast(message);
+
+        // 添加到官方MessageWindowChatMemory
+        MessageWindowChatMemory chatMemory = getOrCreateChatMemory(sessionKey);
+        dev.langchain4j.data.message.ChatMessage langChain4jMessage = MessageConverter.toLangChain4jMessage(message);
+        chatMemory.add(langChain4jMessage);
 
         // 检查是否需要触发异步摘要生成
         if (window.size() > WINDOW_SIZE) {

@@ -7,6 +7,8 @@ import com.travel.agent.mapper.ChatMessageMapper;
 import com.travel.agent.mapper.MemorySummaryMapper;
 import com.travel.agent.mapper.UserPreferenceMapper;
 import com.travel.agent.service.memory.MemoryService;
+import com.travel.agent.service.memory.MessageConverter;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class MemoryServiceImpl implements MemoryService {
     private final UserPreferenceMapper userPreferenceMapper;
     private final MemorySummaryMapper memorySummaryMapper;
     private final ChatMessageMapper chatMessageMapper;
+
+    @Autowired
+    private com.travel.agent.service.memory.SlidingWindowMemory slidingWindowMemory;
 
     public MemoryServiceImpl(OpenAiChatModel chatModel,
                              UserPreferenceMapper userPreferenceMapper,
@@ -414,5 +419,16 @@ public class MemoryServiceImpl implements MemoryService {
                 "report_format", "报告格式偏好"
         );
         return mapping.getOrDefault(type, type);
+    }
+
+    @Override
+    public List<dev.langchain4j.data.message.ChatMessage> getMessageHistory(String sessionId) {
+        MessageWindowChatMemory chatMemory = slidingWindowMemory.getChatMemory(sessionId);
+        return chatMemory.messages();
+    }
+
+    @Override
+    public List<dev.langchain4j.data.message.ChatMessage> convertToLangChain4jMessages(List<ChatMessage> messages) {
+        return MessageConverter.toLangChain4jMessages(messages);
     }
 }

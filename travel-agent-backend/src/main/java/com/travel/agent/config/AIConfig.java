@@ -7,6 +7,7 @@ import com.travel.agent.service.ai.ExecuteAgent;
 import com.travel.agent.service.ai.FastAgent;
 import com.travel.agent.service.ai.PlanAgent;
 import com.travel.agent.service.ai.ReplanAgent;
+import com.travel.agent.service.memory.DatabaseChatMemoryStore;
 import com.travel.agent.service.memory.MemoryService;
 import com.travel.agent.service.memory.SlidingWindowMemory;
 import com.travel.agent.service.memory.impl.MemoryServiceImpl;
@@ -14,6 +15,7 @@ import dev.langchain4j.agentic.AgenticServices;
 import dev.langchain4j.agentic.supervisor.SupervisorAgent;
 import dev.langchain4j.agentic.supervisor.SupervisorContextStrategy;
 import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -115,6 +117,15 @@ public class AIConfig {
     public SlidingWindowMemory slidingWindowMemory() {
         return new SlidingWindowMemory();
     }
+
+    /**
+     * 创建ChatMemory Store Bean
+     */
+    @Bean
+    public DatabaseChatMemoryStore chatMemoryStore() {
+        return new DatabaseChatMemoryStore();
+    }
+
 
     @Bean
     public SupervisorAgent supervisorAgent(PlanAgent planAgent, ExecuteAgent executeAgent,

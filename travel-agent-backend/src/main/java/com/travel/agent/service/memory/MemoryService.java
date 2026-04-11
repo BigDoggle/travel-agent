@@ -40,4 +40,14 @@ public interface MemoryService {
      * 构建记忆上下文（简化版）
      */
     String buildMemoryContext(Long userId, String sessionId, String agentType);
+
+    /**
+     * 获取消息历史（用于智能体集成）
+     */
+    List<dev.langchain4j.data.message.ChatMessage> getMessageHistory(String sessionId);
+
+    /**
+     * 将消息列表转换为LangChain4j消息格式
+     */
+    List<dev.langchain4j.data.message.ChatMessage> convertToLangChain4jMessages(List<ChatMessage> messages);
 }

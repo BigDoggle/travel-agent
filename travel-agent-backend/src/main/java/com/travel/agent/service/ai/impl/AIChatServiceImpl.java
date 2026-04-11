@@ -54,7 +54,7 @@ public class AIChatServiceImpl implements AIChatService {
     @Autowired
     private ChatMessageMapper chatMessageMapper;
 
-    // 简单的内存存储，用于模拟对话历史
+    // 简单的内存存储，用于模拟对话历史（保持向后兼容）
     private final List<ChatMessage> chatMessages = new ArrayList<>();
 
     /**
@@ -86,9 +86,9 @@ public class AIChatServiceImpl implements AIChatService {
                 String memoryContext = memoryService.buildMemoryContext(userId, sessionId, "fast");
                 String enhancedInput = String.format("""
                         用户需求: %s
-                        
+
                         %s
-                        
+
                         请基于以上记忆上下文，提供个性化的旅行建议。
                         """, message, memoryContext);
 
@@ -141,6 +141,7 @@ public class AIChatServiceImpl implements AIChatService {
         message.setCreatedAt(LocalDateTime.now());
         return message;
     }
+
 
     /**
      * 获取用户的对话历史
