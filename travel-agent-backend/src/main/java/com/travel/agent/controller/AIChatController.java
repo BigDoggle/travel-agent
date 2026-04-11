@@ -1,5 +1,6 @@
 package com.travel.agent.controller;
 
+import com.travel.agent.entity.ChatRequest;
 import com.travel.agent.service.ai.AIChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +25,18 @@ public class AIChatController {
      * 流式处理用户消息
      */
     @PostMapping("/chat/stream")
-    public SseEmitter streamChat(
-            @RequestParam Long userId,
-            @RequestParam String sessionId,
-            @RequestBody String message) {
+    public SseEmitter streamChat(@RequestBody ChatRequest request) {
         // 创建 SseEmitter，设置超时时间为 5 分钟（与 WebConfig 保持一致）
         long timeout = 300000L; // 5分钟
         SseEmitter emitter = new SseEmitter(timeout);
 
-        log.info("开始流式处理请求，用户ID: {}, 会话ID: {}", userId, sessionId);
+        log.info("开始流式处理请求，用户ID: {}, 会话ID: {}, 快速模式: {}", request.getUserId(), request.getSessionId(), request.isFastMode());
 
         // 异步处理流式返回
         new Thread(() -> {
             try {
                 // 调用服务层的流式处理方法
-                aiChatService.processMessageStream(userId, sessionId, message)
+                aiChatService.processMessageStream(request.getUserId(), request.getSessionId(), request.getMessage(), request.isFastMode())
                         .subscribe(
                                 token -> {
                                     try {

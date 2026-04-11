@@ -28,7 +28,18 @@
       "WebFetch(domain:forum.langchain.com)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(/skills:*)",
+      "Bash(/mcp:*)",
+      "Bash(curl -s http://localhost:8080/actuator/health)",
+      "Bash(curl -s http://localhost:8080/api/ai-chat/health)",
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(xargs grep:*)",
+      "Bash(timeout:*)",
+      "Bash(./verify-fast-mode.bat)",
+      "Bash(psql:*)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__execute_sql"
     ]
   }
 }

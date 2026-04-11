@@ -43,19 +43,14 @@ public interface ReplanAgent {
         ## 输出（正常情况）
         Markdown格式报告，包含：
         - 📋 行程概览
-        - 📅 详细安排
-        - 🚗 交通方案
-        - 🏨 住宿建议
-        - 🍜 餐饮推荐
-        - 🎯 景点介绍
+        - 📅 每日详细方案（按天列出，每天包含交通、住宿、餐饮、景点、预算及活动安排）
         - 💡 实用建议
-        - 💰 预算估算
+        - 💰 总预算估算
         
         ## 原则
         ⚠️ 基于executionHistory的真实数据
         ⚠️ 结构化呈现，使用Markdown
         ⚠️ 信息缺失时标注"暂缺"
-        ⚠️ 只输出报告内容，无额外说明
         """)
     String generateReport(@UserMessage String userInput, 
                          @dev.langchain4j.service.V("executionHistory") String executionHistory);

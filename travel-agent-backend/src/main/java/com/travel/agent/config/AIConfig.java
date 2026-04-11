@@ -1,8 +1,15 @@
 package com.travel.agent.config;
 
+import com.travel.agent.mapper.ChatMessageMapper;
+import com.travel.agent.mapper.MemorySummaryMapper;
+import com.travel.agent.mapper.UserPreferenceMapper;
 import com.travel.agent.service.ai.ExecuteAgent;
+import com.travel.agent.service.ai.FastAgent;
 import com.travel.agent.service.ai.PlanAgent;
 import com.travel.agent.service.ai.ReplanAgent;
+import com.travel.agent.service.memory.MemoryService;
+import com.travel.agent.service.memory.SlidingWindowMemory;
+import com.travel.agent.service.memory.impl.MemoryServiceImpl;
 import dev.langchain4j.agentic.AgenticServices;
 import dev.langchain4j.agentic.supervisor.SupervisorAgent;
 import dev.langchain4j.agentic.supervisor.SupervisorContextStrategy;
@@ -84,8 +91,34 @@ public class AIConfig {
                 .build();
     }
 
+    /**
+     * 创建 FastAgent Bean（快速模式单智能体）
+     * 用于提供快速响应的旅行助手功能
+     */
     @Bean
-    public SupervisorAgent supervisorAgent(PlanAgent planAgent, ExecuteAgent executeAgent, ReplanAgent replanAgent, OpenAiChatModel chatModel) {
+    public FastAgent fastAgent(OpenAiChatModel chatModel) {
+        return AgenticServices
+                .agentBuilder(FastAgent.class)
+                .chatModel(chatModel)
+                .build();
+    }
+
+    @Bean
+    public MemoryService memoryService(OpenAiChatModel chatModel,
+                                     UserPreferenceMapper userPreferenceMapper,
+                                     MemorySummaryMapper memorySummaryMapper,
+                                     ChatMessageMapper chatMessageMapper) {
+        return new MemoryServiceImpl(chatModel, userPreferenceMapper, memorySummaryMapper, chatMessageMapper);
+    }
+
+    @Bean
+    public SlidingWindowMemory slidingWindowMemory() {
+        return new SlidingWindowMemory();
+    }
+
+    @Bean
+    public SupervisorAgent supervisorAgent(PlanAgent planAgent, ExecuteAgent executeAgent,
+                                         ReplanAgent replanAgent, OpenAiChatModel chatModel) {
         return AgenticServices
                 .supervisorBuilder(SupervisorAgent.class)
                 .chatModel(chatModel)
@@ -94,15 +127,20 @@ public class AIConfig {
                 .responseStrategy(SupervisorResponseStrategy.LAST)
                 .supervisorContext("""
         你是 Travel Planner Supervisor，负责调度三个子智能体。
-        
+
         ## 工作流程
         1. 调用 plan_agent.makeDecision(input="TASK: {需求}\nFEEDBACK: ")
         2. 如果 decision=PLAN/EXECUTE → 调用 execute_agent.executeStep()
         3. 将执行结果反馈给 plan_agent（再次调用 makeDecision）
         4. 重复步骤2-3，直到 decision=FINISH
         5. 调用 replan_agent.generateReport() 生成最终报告
-        
-        ## 原则
+
+        ## 个性化调度原则
+        - 考虑用户的偏好信息提供个性化建议
+        - 基于用户历史经验优化推荐
+        - 保持建议的连贯性和一致性
+
+        ## 调度原则
         ⚠️ 每次 ExecuteAgent 执行后必须反馈给 PlanAgent
         ⚠️ 只有 PlanAgent 能决定何时结束（decision=FINISH）
         ⚠️ FINISH 后调用 ReplanAgent 生成报告
